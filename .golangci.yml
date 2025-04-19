@@ -6,7 +6,6 @@ linters:
     - gocritic
     - bodyclose
     - misspell
-    - paralleltest
     - sloglint
     - sqlclosecheck
 formatters:
