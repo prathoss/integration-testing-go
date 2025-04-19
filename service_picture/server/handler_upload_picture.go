@@ -20,7 +20,7 @@ func (s *Server) uploadPicture() http.Handler {
 			authorIDStr := r.URL.Query().Get("author_id")
 			authorID, err := strconv.ParseUint(authorIDStr, 10, 64)
 			if err != nil {
-				return domain.ErrInvalid{Msg: "author_id is required"}
+				return domain.NewErrInvalid("author_id is required")
 			}
 
 			// Parse multipart form

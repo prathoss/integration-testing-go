@@ -47,7 +47,7 @@ func (r *pictureViewRepository) GetByProfileAndPicture(
 	).Scan(&view.ID, &view.ProfileID, &view.PictureID, &view.ViewCount, &view.LastViewedAt)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return PictureView{}, domain.ErrNotFound{Msg: "picture view not found"}
+		return PictureView{}, domain.NewErrNotFound("picture view not found")
 	}
 	if err != nil {
 		return PictureView{}, fmt.Errorf("selecting picture view: %w", err)
@@ -64,7 +64,8 @@ func (r *pictureViewRepository) IncrementViewCount(
 	view, err := r.GetByProfileAndPicture(ctx, profileID, pictureID)
 	if err != nil {
 		// If not found, create new view
-		if errors.Is(err, domain.ErrNotFound{}) {
+		var enf *domain.ErrNotFound
+		if errors.As(err, &enf) {
 			var viewCount uint
 			err = r.conn.QueryRow(
 				ctx,
