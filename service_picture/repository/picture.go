@@ -63,7 +63,7 @@ func (p *pictureRepository) GetByID(ctx context.Context, id uint) (domain.Pictur
 	}
 	model, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[pictureModel])
 	if errors.Is(err, pgx.ErrNoRows) {
-		return domain.Picture{}, domain.ErrNotFound{Msg: "picture not found"}
+		return domain.Picture{}, domain.NewErrNotFound("picture not found")
 	}
 	if err != nil {
 		return domain.Picture{}, err

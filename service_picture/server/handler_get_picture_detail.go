@@ -16,7 +16,7 @@ func (s *Server) getPictureDetail() http.Handler {
 			profileIDStr := r.URL.Query().Get("profile_id")
 			profileID, err := strconv.ParseUint(profileIDStr, 10, 64)
 			if err != nil {
-				return domain.ErrInvalid{Msg: "profile_id is required"}
+				return domain.NewErrInvalid("profile_id is required")
 			}
 
 			// Get picture ID from URL
