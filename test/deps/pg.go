@@ -54,14 +54,36 @@ func (b *builder) WithPG(t *testing.T) *builder {
 	// apply migrations
 	applyMigrations(t, b.network, ctrl.GetInternalAddress(t))
 
-	// seed database
 	conn, err := pgx.Connect(t.Context(), ctrl.GetAddress(t))
 	if err != nil {
 		t.Fatalf("connecting to postgres: %v", err)
 	}
+
+	// seed database
 	if err := seeder.Seed(t.Context(), conn, seed.FS); err != nil {
 		t.Fatalf("seeding db: %v", err)
 	}
+
+	// reset sequences after COPY
+	if _, err := conn.Exec(
+		t.Context(),
+		"SELECT setval('profiles_id_seq', max(id)) FROM profiles;",
+	); err != nil {
+		t.Fatalf("could not reset sequence for profiles: %v", err)
+	}
+	if _, err := conn.Exec(
+		t.Context(),
+		"SELECT setval('pictures_id_seq', max(id)) FROM pictures;",
+	); err != nil {
+		t.Fatalf("could not reset sequence for pictures: %v", err)
+	}
+	if _, err := conn.Exec(
+		t.Context(),
+		"SELECT setval('picture_views_id_seq', max(id)) FROM picture_views;",
+	); err != nil {
+		t.Fatalf("could not reset sequence for picture_views: %v", err)
+	}
+
 	// close connection to be able to create snapshot
 	if err := conn.Close(t.Context()); err != nil {
 		t.Fatalf("closing connection: %v", err)
