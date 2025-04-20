@@ -5,8 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/mount"
 	"github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/prathoss/integration_testing/seed"
@@ -30,16 +28,6 @@ func (b *builder) WithPG(t *testing.T) *builder {
 		postgres.WithUsername("postgres"),
 		postgres.WithPassword("postgres"),
 		postgres.WithSQLDriver("pgx"),
-		testcontainers.WithHostConfigModifier(
-			func(hostConfig *container.HostConfig) {
-				hostConfig.Mounts = append(
-					hostConfig.Mounts, mount.Mount{
-						Type:   mount.TypeTmpfs,
-						Target: "/var/lib/postgresql/data",
-					},
-				)
-			},
-		),
 		network.WithNetwork([]string{alias}, b.network),
 		testcontainers.WithWaitStrategy(
 			wait.ForListeningPort("5432/tcp"),
