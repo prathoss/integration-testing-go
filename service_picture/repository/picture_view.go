@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prathoss/integration_testing/domain"
 )
 
@@ -25,10 +24,10 @@ type View interface {
 }
 
 type pictureViewRepository struct {
-	conn *pgxpool.Pool
+	conn Pool
 }
 
-func NewView(conn *pgxpool.Pool) View {
+func NewView(conn Pool) View {
 	return &pictureViewRepository{
 		conn: conn,
 	}
@@ -38,14 +37,12 @@ func (r *pictureViewRepository) GetByProfileAndPicture(
 	ctx context.Context,
 	profileID, pictureID uint,
 ) (PictureView, error) {
-	var view PictureView
-	err := r.conn.QueryRow(
+	rows, err := r.conn.Query(
 		ctx,
 		"SELECT id, profile_id, picture_id, view_count, last_viewed_at FROM picture_views WHERE profile_id = $1 AND picture_id = $2",
 		profileID,
 		pictureID,
-	).Scan(&view.ID, &view.ProfileID, &view.PictureID, &view.ViewCount, &view.LastViewedAt)
-
+	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return PictureView{}, domain.NewErrNotFound("picture view not found")
 	}
@@ -53,6 +50,10 @@ func (r *pictureViewRepository) GetByProfileAndPicture(
 		return PictureView{}, fmt.Errorf("selecting picture view: %w", err)
 	}
 
+	view, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[PictureView])
+	if err != nil {
+		return PictureView{}, fmt.Errorf("getting picture view: %w", err)
+	}
 	return view, nil
 }
 

@@ -5,6 +5,7 @@ go 1.24.1
 require (
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/pashagolub/pgxmock/v4 v4.7.0
 )
 
 require (
