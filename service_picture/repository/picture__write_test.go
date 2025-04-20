@@ -1,6 +1,7 @@
 package repository_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -11,6 +12,16 @@ import (
 )
 
 func TestPictureRepository_Create(t *testing.T) {
+	for i := range 100 {
+		t.Run(
+			fmt.Sprintf("create: %d", i), func(t *testing.T) {
+				testCreatePicture(t)
+			},
+		)
+	}
+}
+
+func testCreatePicture(t *testing.T) {
 	ctrl := deps.NewBuilder(t).
 		WithPG(t).
 		Build()
