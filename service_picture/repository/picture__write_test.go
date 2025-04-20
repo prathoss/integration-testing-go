@@ -12,16 +12,6 @@ import (
 )
 
 func TestPictureRepository_Create(t *testing.T) {
-	for i := range 100 {
-		t.Run(
-			fmt.Sprintf("create: %d", i), func(t *testing.T) {
-				testCreatePicture(t)
-			},
-		)
-	}
-}
-
-func testCreatePicture(t *testing.T) {
 	ctrl := deps.NewBuilder(t).
 		WithPG(t).
 		Build()
@@ -32,6 +22,16 @@ func testCreatePicture(t *testing.T) {
 	}
 	defer pool.Close()
 
+	for i := range 100 {
+		t.Run(
+			fmt.Sprintf("create: %d", i), func(t *testing.T) {
+				testCreatePicture(t, pool)
+			},
+		)
+	}
+}
+
+func testCreatePicture(t *testing.T, pool *pgxpool.Pool) {
 	createdAt := time.Now()
 	pictureRepository := repository.NewPicture(pool)
 	picture, err := pictureRepository.Create(
