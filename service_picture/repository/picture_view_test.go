@@ -13,6 +13,7 @@ func TestPictureViewRepository_GetByProfileAndPicture(t *testing.T) {
 	for range 100 {
 		t.Run(
 			"Success", func(t *testing.T) {
+				t.Parallel()
 				// Create a mock DB connection
 				ctrl := deps.NewBuilder(t).
 					WithPG(t).
