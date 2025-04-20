@@ -10,15 +10,14 @@ import (
 )
 
 func TestPictureViewRepository_GetByProfileAndPicture(t *testing.T) {
+	// Create a mock DB connection
+	ctrl := deps.NewBuilder(t).
+		WithPG(t).
+		Build()
+
 	for range 100 {
 		t.Run(
 			"Success", func(t *testing.T) {
-				t.Parallel()
-				// Create a mock DB connection
-				ctrl := deps.NewBuilder(t).
-					WithPG(t).
-					Build()
-
 				pool, err := pgxpool.New(t.Context(), ctrl.GetPG().GetAddress(t))
 				if err != nil {
 					t.Fatalf("could not connect to database: %v", err)
