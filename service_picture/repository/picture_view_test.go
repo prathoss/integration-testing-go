@@ -5,46 +5,36 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/pashagolub/pgxmock/v4"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prathoss/integration_testing/domain"
 	"github.com/prathoss/integration_testing/service_picture/repository"
+	"github.com/prathoss/integration_testing/test/deps"
 )
 
 func TestPictureViewRepository_GetByProfileAndPicture(t *testing.T) {
-	// Create a mock DB connection
-	pool, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatalf("could not create pool mock: %v", err)
-	}
-
-	var ppool repository.Pool = pool
-	repo := repository.NewView(ppool)
 
 	t.Run(
 		"Success", func(t *testing.T) {
-			// Mock expected query and response
-			expectedQuery := "SELECT id, profile_id, picture_id, view_count, last_viewed_at FROM picture_views WHERE profile_id = \\$1 AND picture_id = \\$2"
+			// Create a mock DB connection
+			ctrl := deps.NewBuilder(t).
+				WithPG(t).
+				Build()
+			pool, err := pgxpool.New(t.Context(), ctrl.GetPG().GetAddress(t))
+			if err != nil {
+				t.Fatalf("could not connect to database: %v", err)
+			}
+			repo := repository.NewView(pool)
 
-			viewTime := time.Now().Round(time.Second)
-			rows := pgxmock.NewRows([]string{"id", "profile_id", "picture_id", "view_count", "last_viewed_at"}).
-				AddRow(1, 2, 3, 5, viewTime)
-
-			pool.ExpectQuery(expectedQuery).
-				WithArgs(uint(2), uint(3)).
-				WillReturnRows(rows)
-
-			// Call the method
-			view, err := repo.GetByProfileAndPicture(t.Context(), 2, 3)
+			view, err := repo.GetByProfileAndPicture(t.Context(), 3, 4)
 			if err != nil {
 				t.Fatalf("GetByProfileAndPicture returned error: %v", err)
 			}
 			expected := repository.PictureView{
-				ID:           1,
-				ProfileID:    2,
-				PictureID:    3,
+				ID:           5,
+				ProfileID:    3,
+				PictureID:    4,
 				ViewCount:    5,
-				LastViewedAt: viewTime,
+				LastViewedAt: time.Date(2025, 4, 14, 22, 13, 43, 0, time.UTC),
 			}
 			if !equalPictureView(view, expected) {
 				t.Fatalf("expected %+v, got %+v", expected, view)
@@ -54,26 +44,23 @@ func TestPictureViewRepository_GetByProfileAndPicture(t *testing.T) {
 
 	t.Run(
 		"Not Found", func(t *testing.T) {
-			// Mock expected query and no rows response
-			expectedQuery := "SELECT id, profile_id, picture_id, view_count, last_viewed_at FROM picture_views WHERE profile_id = \\$1 AND picture_id = \\$2"
+			// Create a mock DB connection
+			ctrl := deps.NewBuilder(t).
+				WithPG(t).
+				Build()
+			pool, err := pgxpool.New(t.Context(), ctrl.GetPG().GetAddress(t))
+			if err != nil {
+				t.Fatalf("could not connect to database: %v", err)
+			}
+			repo := repository.NewView(pool)
 
-			pool.ExpectQuery(expectedQuery).
-				WithArgs(uint(4), uint(5)).
-				WillReturnError(pgx.ErrNoRows)
-
-			// Call the method
-			_, err := repo.GetByProfileAndPicture(t.Context(), 4, 5)
+			_, err = repo.GetByProfileAndPicture(t.Context(), 0, 0)
 			var enf *domain.ErrNotFound
 			if !errors.As(err, &enf) {
 				t.Fatalf("expected to get not found error, got %T", err)
 			}
 		},
 	)
-
-	// Ensure all expectations were met
-	if err := pool.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-	}
 }
 
 func equalPictureView(a, b repository.PictureView) bool {
