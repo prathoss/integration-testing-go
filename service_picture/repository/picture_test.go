@@ -60,7 +60,15 @@ func testGetByAuthorID(t *testing.T, pool *pgxpool.Pool) {
 			return cmp.Compare(a.ID, b.ID)
 		},
 	)
-	if !slices.Equal(expected, pictures) {
+	if !slices.EqualFunc(expected, pictures, equalPicture) {
 		t.Errorf("expected: %v, got: %v", expected, pictures)
 	}
+}
+
+func equalPicture(a, b domain.Picture) bool {
+	return a.ID == b.ID &&
+		a.AuthorID == b.AuthorID &&
+		a.URL == b.URL &&
+		a.ViewCount == b.ViewCount
+	// omit created at
 }
