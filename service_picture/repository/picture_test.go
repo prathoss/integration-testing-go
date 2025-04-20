@@ -17,6 +17,7 @@ func TestPictureRepository(t *testing.T) {
 	for i := range 100 {
 		t.Run(
 			fmt.Sprintf("query by author: %d", i), func(t *testing.T) {
+				t.Parallel()
 				GetByAuthorID(t)
 			},
 		)
