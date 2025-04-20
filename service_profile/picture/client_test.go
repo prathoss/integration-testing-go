@@ -14,7 +14,7 @@ import (
 func TestClient_GetPicturesByAuthor(t *testing.T) {
 	ctrl := deps.NewBuilder(t).
 		WithPG(t).
-		WithBuiltPictureService(t).
+		WithPictureService(t).
 		Build()
 
 	client := picture.NewClient(ctrl.GetPictureService().GetAddress(t))
