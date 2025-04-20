@@ -43,14 +43,14 @@ func (r *pictureViewRepository) GetByProfileAndPicture(
 		profileID,
 		pictureID,
 	)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return PictureView{}, domain.NewErrNotFound("picture view not found")
-	}
 	if err != nil {
 		return PictureView{}, fmt.Errorf("selecting picture view: %w", err)
 	}
 
 	view, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[PictureView])
+	if errors.Is(err, pgx.ErrNoRows) {
+		return PictureView{}, domain.NewErrNotFound("picture view not found")
+	}
 	if err != nil {
 		return PictureView{}, fmt.Errorf("getting picture view: %w", err)
 	}
