@@ -75,7 +75,7 @@ func (b *builder) WithBuiltPictureService(t *testing.T) *builder {
 	port := nat.Port("8080/tcp")
 	pictureServerRequest := testcontainers.ContainerRequest{
 		FromDockerfile: testcontainers.FromDockerfile{
-			Context:    "../..",
+			Context:    ".",
 			Dockerfile: "service_picture/Dockerfile",
 		},
 		Env: map[string]string{
