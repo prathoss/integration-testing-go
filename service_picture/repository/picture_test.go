@@ -14,17 +14,6 @@ import (
 )
 
 func TestPictureRepository(t *testing.T) {
-	for i := range 100 {
-		t.Run(
-			fmt.Sprintf("query by author: %d", i), func(t *testing.T) {
-				t.Parallel()
-				GetByAuthorID(t)
-			},
-		)
-	}
-}
-
-func GetByAuthorID(t *testing.T) {
 	ctrl := deps.NewBuilder(t).
 		WithPG(t).
 		Build()
@@ -33,8 +22,18 @@ func GetByAuthorID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create pool: %v", err)
 	}
-	defer pool.Close()
 
+	defer pool.Close()
+	for i := range 100 {
+		t.Run(
+			fmt.Sprintf("query by author: %d", i), func(t *testing.T) {
+				testGetByAuthorID(t, pool)
+			},
+		)
+	}
+}
+
+func testGetByAuthorID(t *testing.T, pool *pgxpool.Pool) {
 	pictureRepo := repository.NewPicture(pool)
 	pictures, err := pictureRepo.GetByAuthorID(t.Context(), 1)
 	if err != nil {
