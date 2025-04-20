@@ -12,7 +12,7 @@ build-for-testing-profile:
 
 build-for-testing: build-for-testing-picture build-for-testing-profile
 
-test: build-for-test
+test: build-for-testing
 	go test -v ./...
 
 create-migration: check-migration-name
