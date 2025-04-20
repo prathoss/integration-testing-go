@@ -16,15 +16,21 @@ func TestPictureRepository_Create(t *testing.T) {
 		WithPG(t).
 		Build()
 
-	pool, err := pgxpool.New(t.Context(), ctrl.GetPG().GetAddress(t))
-	if err != nil {
-		t.Fatalf("failed to create pool: %v", err)
-	}
-	defer pool.Close()
-
 	for i := range 100 {
 		t.Run(
 			fmt.Sprintf("create: %d", i), func(t *testing.T) {
+				t.Cleanup(
+					func() {
+						ctrl.Refresh(t)
+					},
+				)
+
+				pool, err := pgxpool.New(t.Context(), ctrl.GetPG().GetAddress(t))
+				if err != nil {
+					t.Fatalf("failed to create pool: %v", err)
+				}
+				defer pool.Close()
+
 				testCreatePicture(t, pool)
 			},
 		)
